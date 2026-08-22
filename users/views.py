@@ -14,7 +14,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from shared.utility import send_email, check_email_or_phone
 from . import serializers
-from .serializers import SignUpSerializer
+from .serializers import SignUpSerializer, ChangeUserInformation, LoginSerializer
 from .models import User, NEW, CODE_VERIFIED, VIA_EMAIL, VIA_PHONE
 
 
@@ -93,3 +93,36 @@ class GetNewVerificationView(APIView):
             }
             raise ValidationError(data)
 
+
+
+class ChangeUserInformationView(UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ChangeUserInformation
+    http_method_names = ['patch', 'put']
+
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        super(ChangeUserInformationView, self).update(request, *args, **kwargs)
+        data = {
+            "success": True,
+            "message": "User updated successfully.",
+            "auth_status": self.request.user.auth_status,
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
+
+    def partial_update(self, request, *args, **kwargs):
+        super(ChangeUserInformationView, self).partial_update(request, *args, **kwargs)
+        data = {
+            "success": True,
+            "message": "User updated successfully.",
+            "auth_status": self.request.user.auth_status,
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class LoginView(TokenObtainPairView):
+    serializer_class = LoginSerializer

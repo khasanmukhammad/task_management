@@ -96,3 +96,151 @@ class SignUpSerializer(serializers.ModelSerializer):
         data.update(instance.token())
 
         return data
+
+class ChangeUserInformation(serializers.Serializer):
+    first_name = serializers.CharField(write_only=True, required=True)
+    last_name = serializers.CharField(write_only=True, required=True)
+    username = serializers.CharField(write_only=True, required=True)
+    password = serializers.CharField(write_only=True, required=True)
+    confirm_password = serializers.CharField(write_only=True, required=True)
+
+    def validate(self, data):
+        password = data.get('password', None)
+        confirm_password = data.get('confirm_password', None)
+        if password != confirm_password:
+            raise ValidationError(
+                {
+                    "message": "Passwords do not match",
+                }
+            )
+        if password:
+            validate_password(password)
+            validate_password(confirm_password)
+
+        return data
+
+    def validate_username(self, username):
+        if len(username) < 3 or len(username) > 30:
+            raise ValidationError(
+                {
+                    "message": "Username must be between 3 and 30 characters",
+                }
+            )
+        if username.isdigit():
+            raise ValidationError(
+                {
+                    "message": "This username is entirely numeric",
+                }
+            )
+        return username
+
+
+    def validate_first_name(self, first_name):
+        if len(first_name) < 3 or len(first_name) > 30:
+            raise ValidationError(
+                {
+                    "message": "Username must be between 3 and 30 characters",
+                }
+            )
+        if first_name.isdigit():
+            raise ValidationError(
+                {
+                    "message": "This first name is entirely numeric",
+                }
+            )
+        return first_name
+
+    def validate_last_name(self, last_name):
+        if len(last_name) < 3 or len(last_name) > 30:
+            raise ValidationError(
+                {
+                    "message": "Username must be between 3 and 30 characters",
+                }
+            )
+        if last_name.isdigit():
+            raise ValidationError(
+                {
+                    "message": "This first name is entirely numeric",
+                }
+            )
+        return last_name
+
+
+    def update(self, instance, validated_data):
+
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.username = validated_data.get('username', instance.username)
+        instance.password = validated_data.get('password', instance.password)
+        if validated_data.get('password'):
+            instance.set_password(validated_data.get('password'))
+        if instance.auth_status == CODE_VERIFIED:
+            instance.auth_status = DONE
+        instance.save()
+        return instance
+
+
+class LoginSerializer(TokenObtainPairSerializer):
+
+    def __init__(self, *args, **kwargs):
+        super(LoginSerializer, self).__init__(*args, **kwargs)
+        self.fields['userinput'] = serializers.CharField(required=True)
+        self.fields['username'] = serializers.CharField(required=False, read_only=True)
+
+    def auth_validate(self, data):
+        user_input = data.get('userinput')
+        if check_user_type(user_input) == 'username':
+            username = user_input
+        elif check_user_type(user_input) == 'email':
+            user = self.get_user(email__iexact=user_input)
+            username = user.username
+        elif check_user_type(user_input) == 'phone':
+            user = self.get_user(phone_number=user_input)
+            username = user.username
+        else:
+            data={
+                "success": True,
+                "message": "You must enter email, username or phone number."
+            }
+            raise ValidationError(data)
+
+        authentication_kwargs = {
+            self.username_field: username,
+            'password': data['password']
+        }
+        # user statusi tekshirilishi kerak
+        current_user = User.objects.filter(username__iexact=username).first()
+
+        if current_user is not None and current_user.auth_status in [NEW, CODE_VERIFIED]:
+            raise ValidationError({
+                "success": False,
+                "message": "You are not completely registered."
+            })
+        user = authenticate(**authentication_kwargs)
+        if user is not None:
+            self.user = user
+        else:
+            raise ValidationError({
+                "success": False,
+                "message": "Sorry, login or password while you entered is incorrect. Please check and try again!"
+            })
+
+
+    def validate(self, data):
+        self.auth_validate(data)
+        if self.user.auth_status not in [DONE]:
+            raise PermissionDenied("You can not login. Permission denied")
+        data = self.user.token()
+        data['auth_status'] = self.user.auth_status
+        data['full_name'] = self.user.full_name
+        return data
+
+    def get_user(self, **kwargs):
+        users = User.objects.filter(**kwargs)
+        if not users.exists():
+            raise ValidationError(
+                {
+                    "message": "Active account not found"
+                }
+            )
+        return users.first()
