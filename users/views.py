@@ -1,8 +1,6 @@
 import datetime
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.management.commands import check
 from rest_framework import permissions, status
-from rest_framework.decorators import permission_classes
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.generics import CreateAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -13,7 +11,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from shared.utility import send_email, check_email_or_phone
-from . import serializers
 from .serializers import SignUpSerializer, ChangeUserInformation, LoginSerializer, LoginRefreshSerializer, ForgotPasswordSerializer, ResetPasswordSerializer,\
     LogoutSerializer
 from .models import User, NEW, CODE_VERIFIED, VIA_EMAIL, VIA_PHONE
