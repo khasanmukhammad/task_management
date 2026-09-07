@@ -17,4 +17,4 @@ class TaskAdmin(admin.ModelAdmin):
 
     search_fields = ["title", "description"]
 
-    ordering = ["created_at"]
+    ordering = ["-created_at"]

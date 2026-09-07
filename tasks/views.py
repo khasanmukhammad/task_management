@@ -11,7 +11,7 @@ from shared.custom_pagination import CustomPagination
 
 
 class TasksListView(generics.ListAPIView):
-    serializer_class = TaskAdminSerializer
+    serializer_class = TaskSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = CustomPagination
 
@@ -21,7 +21,7 @@ class TasksListView(generics.ListAPIView):
 class AdminTasksListView(generics.ListAPIView):
     serializer_class = TaskAdminSerializer
     permission_classes = (IsAdminUser,)
-    custom_pagination_class = CustomPagination
+    pagination_class = CustomPagination
 
     def get_queryset(self):
         return Task.objects.all()
