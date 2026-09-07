@@ -24,7 +24,6 @@ class SignUpSerializer(serializers.ModelSerializer):
         super(SignUpSerializer, self).__init__(*args, **kwargs)
         self.fields['email_phone_number'] = serializers.CharField(required=False)
 
-
     class Meta:
         model = User
         fields = (
@@ -37,6 +36,7 @@ class SignUpSerializer(serializers.ModelSerializer):
             'auth_type': {'read_only': True, 'required': False},
             'auth_status': {'read_only': True, 'required': False},
         }
+
     def create(self, validated_data):
         user = super(SignUpSerializer, self).create(validated_data)
         if user.auth_type == VIA_EMAIL:
@@ -45,7 +45,7 @@ class SignUpSerializer(serializers.ModelSerializer):
         elif user.auth_type == VIA_PHONE:
             code = user.create_verify_code(VIA_PHONE)
             send_email(user.phone_number, code)
-            #send_phone_code(user.phone_number, code)
+            # send_phone_code(user.phone_number, code)
         user.save()
         return user
 
@@ -99,6 +99,7 @@ class SignUpSerializer(serializers.ModelSerializer):
 
         return data
 
+
 class ChangeUserInformation(serializers.Serializer):
     first_name = serializers.CharField(write_only=True, required=True)
     last_name = serializers.CharField(write_only=True, required=True)
@@ -136,7 +137,6 @@ class ChangeUserInformation(serializers.Serializer):
             )
         return username
 
-
     def validate_first_name(self, first_name):
         if len(first_name) < 3 or len(first_name) > 30:
             raise ValidationError(
@@ -166,7 +166,6 @@ class ChangeUserInformation(serializers.Serializer):
                 }
             )
         return last_name
-
 
     def update(self, instance, validated_data):
 
@@ -200,7 +199,7 @@ class LoginSerializer(TokenObtainPairSerializer):
             user = self.get_user(phone_number=user_input)
             username = user.username
         else:
-            data={
+            data = {
                 "success": True,
                 "message": "You must enter email, username or phone number."
             }
@@ -227,7 +226,6 @@ class LoginSerializer(TokenObtainPairSerializer):
                 "message": "Sorry, login or password while you entered is incorrect. Please check and try again!"
             })
 
-
     def validate(self, data):
         self.auth_validate(data)
         if self.user.auth_status not in [DONE]:
@@ -253,7 +251,7 @@ class LoginRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         access_token_instance = AccessToken(data['access'])
-        user_id= access_token_instance['user_id']
+        user_id = access_token_instance['user_id']
         user = get_object_or_404(User, id=user_id)
         update_last_login(None, user)
         return data
@@ -261,7 +259,6 @@ class LoginRefreshSerializer(TokenRefreshSerializer):
 
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()
-
 
 
 class ForgotPasswordSerializer(serializers.Serializer):

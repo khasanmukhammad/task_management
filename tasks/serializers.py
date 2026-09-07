@@ -13,7 +13,7 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ["id", "title", "description", "task_status",
-            "created_at", "updated_at"]
+                  "created_at", "updated_at"]
 
 
 class TaskAdminSerializer(serializers.ModelSerializer):
@@ -33,9 +33,11 @@ class TaskAdminSerializer(serializers.ModelSerializer):
 
 class TaskSearchStatusSerializer(serializers.Serializer):
     task_status = serializers.CharField()
+
     class Meta:
         model = Task
         fields = ["task_status"]
+
 
 class TaskCreateSerializer(serializers.ModelSerializer):
     title = serializers.CharField()
@@ -45,11 +47,8 @@ class TaskCreateSerializer(serializers.ModelSerializer):
         model = Task
         fields = ["title", "description", "task_status"]
 
-class TaskStatusSerializer(serializers.ModelSerializer):
 
+class TaskStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ["task_status"]
-
-
-

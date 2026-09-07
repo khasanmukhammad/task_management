@@ -13,7 +13,8 @@ from shared.models import BaseModel
 
 USER, ADMIN = ("user", "admin")
 VIA_EMAIL, VIA_PHONE = ("via_email", "via_phone")
-NEW, CODE_VERIFIED, DONE=("new", "code_verified", "done")
+NEW, CODE_VERIFIED, DONE = ("new", "code_verified", "done")
+
 
 class User(BaseModel, AbstractUser):
     USER_ROLE = (
@@ -117,4 +118,3 @@ class UserConfirmation(BaseModel):
         else:
             self.expiration_time = datetime.now() + timedelta(minutes=PHONE_EXPIRE)
         super(UserConfirmation, self).save(*args, **kwargs)
-

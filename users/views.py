@@ -11,7 +11,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from shared.utility import send_email, check_email_or_phone
-from .serializers import SignUpSerializer, ChangeUserInformation, LoginSerializer, LoginRefreshSerializer, ForgotPasswordSerializer, ResetPasswordSerializer,\
+from .serializers import SignUpSerializer, ChangeUserInformation, LoginSerializer, LoginRefreshSerializer, \
+    ForgotPasswordSerializer, ResetPasswordSerializer, \
     LogoutSerializer
 from .models import User, NEW, CODE_VERIFIED, VIA_EMAIL, VIA_PHONE
 
@@ -21,12 +22,13 @@ class CreateUserView(CreateAPIView):
     permission_classes = (permissions.AllowAny,)
     serializer_class = SignUpSerializer
 
+
 class VerifyAPIView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
         user = self.request.user
-        code =self.request.data.get('code')
+        code = self.request.data.get('code')
 
         try:
             code = int(code)
@@ -42,6 +44,7 @@ class VerifyAPIView(APIView):
                 "refresh": user.token()['refresh']
             }
         )
+
     @staticmethod
     def check_verify(user, code):
         verifies = user.verify_codes.filter(expiration_time__gte=datetime.datetime.now(), code=code, is_confirmed=False)
@@ -57,6 +60,7 @@ class VerifyAPIView(APIView):
             user.auth_status = CODE_VERIFIED
             user.save()
         return True
+
 
 class GetNewVerificationView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -92,7 +96,6 @@ class GetNewVerificationView(APIView):
             raise ValidationError(data)
 
 
-
 class ChangeUserInformationView(UpdateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = ChangeUserInformation
@@ -125,8 +128,10 @@ class ChangeUserInformationView(UpdateAPIView):
 class LoginView(TokenObtainPairView):
     serializer_class = LoginSerializer
 
+
 class LoginRefreshView(TokenRefreshView):
     serializer_class = LoginRefreshSerializer
+
 
 class LogoutView(APIView):
     serializer_class = LogoutSerializer
@@ -173,7 +178,6 @@ class ForgetPasswordView(APIView):
                 "user_status": user.auth_status,
             }, status=200
         )
-
 
 
 class ResetPasswordView(UpdateAPIView):

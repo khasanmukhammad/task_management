@@ -32,8 +32,9 @@ def check_email_or_phone(email_or_phone):
         "message": "Incorrect email or phone number"
     })
 
+
 def check_user_type(user_input):
-   # phone_number = phonenumbers.parse(user_input)
+    # phone_number = phonenumbers.parse(user_input)
     if re.fullmatch(email_regex, user_input):
         user_input = "email"
     elif re.fullmatch(phone_regex, user_input):
@@ -94,5 +95,5 @@ def send_phone_code(phone, code):
     client.messages.create(
         body=f"Hi! Your verification code is {code}\n",
         from_="+998955778833",
-        to= f"{phone}",
+        to=f"{phone}",
     )

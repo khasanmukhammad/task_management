@@ -2,12 +2,10 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from .models import Task
-from tasks.serializers import TaskSerializer, TaskCreateSerializer, TaskStatusSerializer,\
+from tasks.serializers import TaskSerializer, TaskCreateSerializer, TaskStatusSerializer, \
     TaskSearchStatusSerializer, TaskAdminSerializer
 from shared.custom_pagination import CustomPagination
-
 
 
 class TasksListView(generics.ListAPIView):
@@ -17,6 +15,7 @@ class TasksListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Task.objects.filter(user=self.request.user)
+
 
 class AdminTasksListView(generics.ListAPIView):
     serializer_class = TaskAdminSerializer
@@ -63,6 +62,7 @@ class TasksCreateView(generics.CreateAPIView):
             },
             status=status.HTTP_201_CREATED
         )
+
 
 class TasksDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TaskSerializer
